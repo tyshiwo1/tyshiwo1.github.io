@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>脑内所想</title>
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Sans+SC:wght@500&family=Open+Sans&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="../css/style.css">
+	<link href="../css/bootstrap.min.css" rel="stylesheet">
+
+	<!-- KaTeX for math -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+
+	<style>
+		body {
+			background: #000 !important;
+			color: #eee;
+			font-family: "SimHei", "Heiti SC", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+		}
+		a { color: #6ea8ff; }
+		a:hover { color: #9ec5ff; }
+		h1, h2, h3, h4 { color: #fff; }
+		#content, #content p, #content li { color: #ddd; }
+		strong, b { color: #fff; }
+	</style>
+</head>
+
+<body>
+	<div class="container" style="max-width: 980px;">
+
+		<div style="text-align: right; margin: 15px 0 20px 0; font-size: 1.05em;">
+			<a href="../index.html">← 首页</a>
+		</div>
+
+		<div class="page-header">
+			<h1>脑内所想</h1>
+			<p style="line-height: 1.6; font-size: 1.05em; color: #999;">
+				满纸荒唐言，姑妄听之。
+			</p>
+		</div>
+
+		<nav id="post-nav" style="margin: 10px 0 25px 0;"></nav>
+
+		<main id="content" style="line-height: 1.7; font-size: 1.05em;"></main>
+
+		<div style="text-align: center; margin: 40px 0 30px 0; font-size: 0.95em; color: #888;">
+			更新于：<span id="updated-time"></span>
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+	<script>
+		const POSTS = [
+			{ file: 'diffusion.md', title: 'Diffusion' },
+			{ file: 'vae.md', title: 'Tokenizer / VAE' },
+			{ file: 'wm.md', title: '世界模型' }
+		];
+
+		function currentPost() {
+			const p = new URLSearchParams(location.search).get('post');
+			return POSTS.find(x => x.file.replace('.md', '') === p) || POSTS[0];
+		}
+
+		function renderNav(active) {
+			const nav = document.getElementById('post-nav');
+			nav.innerHTML = '';
+			POSTS.forEach(post => {
+				const btn = document.createElement('a');
+				btn.href = '?post=' + post.file.replace('.md', '');
+				btn.textContent = post.title;
+				btn.style.cssText =
+					'display: inline-block; margin: 0 12px 8px 0; padding: 6px 14px;' +
+					'border-radius: 20px; font-size: 0.95em; text-decoration: none;' +
+					(post.file === active.file
+						? 'background: royalblue; color: #fff;'
+						: 'background: #2a2a2a; color: #ccc;');
+				btn.addEventListener('click', e => {
+					e.preventDefault();
+					history.pushState(null, '', btn.href);
+					loadPost(post);
+				});
+				nav.appendChild(btn);
+			});
+		}
+
+		async function loadPost(post) {
+			document.title = post.title;
+			renderNav(post);
+			const content = document.getElementById('content');
+			content.innerHTML = '<p style="color:#888;">加载中…</p>';
+			try {
+				const res = await fetch(post.file);
+				if (!res.ok) throw new Error('HTTP ' + res.status);
+				const md = await res.text();
+				content.innerHTML = marked.parse(md);
+				if (window.renderMathInElement) {
+					renderMathInElement(content, {
+						delimiters: [
+							{ left: '$$', right: '$$', display: true },
+							{ left: '$', right: '$', display: false }
+						],
+						throwOnError: false
+					});
+				}
+				document.getElementById('updated-time').textContent =
+					new Date().toISOString().slice(0, 10);
+			} catch (err) {
+				content.innerHTML = '<p style="color:red;">加载失败：' + post.file + '（' + err.message + '）</p>';
+			}
+		}
+
+		window.addEventListener('popstate', () => loadPost(currentPost()));
+		loadPost(currentPost());
+	</script>
+</body>
+</html>
