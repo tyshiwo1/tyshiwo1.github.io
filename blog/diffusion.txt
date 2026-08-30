@@ -1,0 +1,51 @@
+# diffusion scheduler
+  - flow matching
+    - 相比于 pred x0 和 pred noise，flow matching 是一个很tradeoff 的任务。pred x0 在 t 接近结束时，loss极小（本身就被验证不太行）；pred noise 在几乎全噪声时，loss 极小（结构的学习比较弱）。而 flow matching 是中间
+    - flow matching 更好学
+    - 其实fm 的 pf-ode 可以说明，diffusion的初始点可以是 任意高斯分布，不一定是标准高斯。而且标准高斯有问题，最大最小值在 5.8附近，所有 ldm 的 latents 乘 0.18215 把最大最小值弄到 正负1
+  - 离散
+    - vq diffusion, D3PM
+  - timestep
+    - 首先timestep embedding 有 3 种：diffusers里面的 adaln 用的是 离散embedding（这个肯定不适合 resampling）；adalnzero 以及 ddpm, sd3 用 1-N 的连续傅里叶 embedding（这个试验下来loss最低）；sit和lumina-t2x 的 0-1 连续傅里叶 embedding
+    - 纯血diffusion 能够在 全0初始化情况下，把 timestep embedding 里面最靠近 embedding 的linear层学出东西；但是AR+diffusion FFN 不能，看起来跟梯度传不回去一样
+    - adaln会在大diffusion上导致训练不稳定；adaln single 没有 adaln 效果好；所以使用 uvit 那种，把 timestep append 到序列上做 attn
+    - 1000个timesteps这个设定其实可以改。有些video diffusion 可以早期的时候，先用 100 个timesteps 训。
+    - 如果timestep学的是SNR，那么高频对应的SNR其实比低频低很多。所以稍微一点点噪声，高频就被破坏了。
+  - Image2image, inherent conditional diffusion
+    - 薛定谔桥，最优传输，wasserstein distance, diffusion bridge
+      - dbim：类似ddim 对 ddbm 进行改造；而且可以 reusing the learnt bridge score (conditional score function)；这东西本质上有点像 cfg，是把原有的 score 拆成 2 个部分
+      - 只要是 pair 好的一组 image或者 tokens，我认为，在 latent 空间都可以这么传输，类似一种双向的 predict next token
+  - patchwise diffusion （无空间交互的diffusion）
+    - 可以在每个patch上走一套独立的diffusion scheduler，夸张的说，我可以在换行后的第一个patch走 ddpm，而在行内patch之间走 ddbm。就用positional encoding来控制预测的内容
+    - 其实很像以前 video里面以前做 motion guidance，要求帧之间的 spatiotemporal consistency。现在是要求diffusion decoder 输出之间的 spatial consistency
+    - Patch Diffusion Faster and More Data-Efficient Training of Diffusion Models
+  - learnable scheduler：
+    - Neural Flow Diffusion Models
+    - NVAE (hierarchical vae)
+  - 图片质量的 tricks
+    - v-prediction 解决 color shift artifacts（imagen video）
+    - sdxl 训练时候的 noise offset
+    - sd3 高分辨率 finetune 的 timeshift
+  - Diffusion 训练和推理之间的各种等价转换：
+    - 只有xt在训练和推理时是等价的，x0和eps都不一样。因为，训练时diffusion的所有公式都是围绕 $E[x0|xt]$ 和 $E[eps|xt]$ 推导的。而测试的时候，就是单个 x0, eps samples。因此在训练期间，千万不要对模型输出直接加减 eps 或者 x0 做transformation。网络不一定能学出这种随机性，网络仅被要求去学均值。
+  - pixel gen
+    - 采样调参的重要性大于训练。低频不怎么加cfg，高频加cfg。然后由于 vae latent 本身丢了一部分高频，所以 pixel gen上，高频部分没被丢，所以低频在timesteps上被压了，所以cfg的启动范围要更早。
+  - 尽管 diffusion 理想中是 mode covering，但是 diffusion 实际训出来就**不可能**拟合分布，所以要用cfg把模型输出歪到分布上，不能指望一个diffusion能学出分布。没有cfg，在生成任务上，diffusion什么也不是；gan就不太一样，gan 是 mode seeking。
+  - 关于为什么视觉生成能用 diffusion 成功建模，为什么这种 diffusion 极度依赖空间结构，以及语言为什么不用连续 diffusion 而用 AR
+    - 假说：一个平缓变化的分布流向另一个平缓的分布是非常容易的，而一个缓慢变化的分布流向一个剧烈的分布是非常困难的。
+      - 空间结构的源起，什么是空间结构，用什么刻画空间结构。如果在空间上分patch，什么样的patch集合才叫满足某个结构（可能四选二就够刻画了）：
+        - 内在维度和流形：低维，秩很低（这就很像低频了，高频反过来的，全是杂音）。自由度低，规则简单
+        - 经验协方差谱快速衰减：把所有patch向量减掉平均值后，看它们在各个方向上的“晃动幅度”（方差）。谱（特征值）前几个很大，后面迅速掉到几乎为0。（低维流形肯定满足这一条，满足这一条的不一定是低维流形）
+        - 空间位置上的值连续缓慢变化，且不独立：挨在一起的两个小方块，内容非常相似（这个性质对这个假说很重要）
+        - 熵低：有规律（不过有意义的数据都满足这个性质）
+      - 图像 token 的性质，以及对于一个所谓成功的 tokenizer 的要求：
+        - 图像 token 就是缓慢变化的（因为图像是连续的，所以相邻 2 个像素之间的变化是缓慢的）
+      - 语言 token 的性质
+        - embedding 在空域是剧烈变化的。在空域，也就是一句话中，一个高频（这里的高频指整个数据集上出现的频率）词的下一个 token 完全可以是一个低频词。比如一个助词后面接一个生僻名词。也就是空间上，embedding一直在跳跃。而且embedding空间（语义空间）中2个相近的embedding经常在一个句子中不挨着。
+        - 满足齐夫定律，大长尾，个把种高频次老出现，组成了语言片段的大部分
+      - 高斯噪声的性质，diffusion的性质
+        - 在空域上声明一个高斯噪声，那么相邻 2 个位置的噪声点是缓慢变化的（这里的缓慢变化就是从A点的值变到B点的值）。因为对于高斯分布来说，样本是大片地集中在均值附近，值都差不多
+        - 加噪去噪使得 diffusion 预测高频的能力差于预测低频（这里的低频高频指的是一个样本上的高频低频分量，不一定是 embedding 出现的频率吧？）
+      - 因此，把高斯分布映射到另一个所谓缓慢变化的分布，非常容易的。他俩的性质非常的像。语言token在空间上一直在窜，太难流了。另外，声音类似于语言token的texture，也有缓慢变化的性质吧？因此diffusion也相对好建模，哪怕声学数据一堆高频。总之，来自不同分布的数据都用基于高斯的连续diffusion建模会极其难受。
+      - 所以，来自不同分布的数据用同一个scheduler建模就很荒谬。其实不仅如此，用同一个transformer建模也有问题，因为多个不同分布自由度不一样，需要拓展很多维度来存储不同分布的信息，这要求ffn越来越宽。但事实上网络宽度有限。而且 Wk Wv 怎么解耦也需要考虑。
+      - 空间连续变化在 Perlin 噪声也是特别满足的。当然，这种噪声，包括 value noise，都有可能会偏低频。perlin noise属于一种拥有空间结构的noise，如果任何图像都存在一种gloden noise且diffusion model具有可组合性，那么noise regions本身就应该和图像的regions之间存在双射。又知 diffusion model需要强空间结构，因此noise本身最好就具有空间结构

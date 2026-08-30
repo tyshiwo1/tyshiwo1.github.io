@@ -1,0 +1,86 @@
+# tokenizer
+  - 连续 tokenizer（输入输出特征、低通道）
+    - vfm 特征可以直接做重建，不是特别差，但高频损失严重。毕竟semantics很多是低频
+  - 离散 tokenizer（输入输出码本，需要离散采样）
+    - vqggan： 
+      - perceptual loss + adversarial loss
+      - maskgit-vqgan： refined training techniques
+    - titok：拿训好的 MaskGIT-VQGAN 蒸馏一套码本（不用gan和perceptual），然后重新正常 tune 自己的decoder；用 qformer 的方式处理输入输出
+    - 对连续特征进行合适的量化，也就是不要像vq一样把channel全压成1个数值，可以做到几乎无损
+  - 架构
+    - tokenizer 并非压缩的全部，其 encoder/decoder 分为 patchify, downsampler, refiner。CNN可以同时做三者；vit则是去掉第二者，并且将patchify 换成CNN或者直接暴力linear压缩（linear如果没学好就会网格效应，但理论上有办法学好）。所以scale tokenizer 本质上只是scale refiner 而非前面2个。
+    - patchify 和 unpatchify
+      - linear layer 作为 patchify 本身就是一种巨大的人工先验，是需要数据去硬拟合上去的
+      - 如果用 3x3 conv layer 作为 unpatchify，虽然和 navit 不太兼容，但是能缓解网格，虽然不能根治
+    - 调 vit 替换第一或者最后的 stages，非常重要的点在于：decoder prediction head 的架构一定要仔细的调（比如，把大psz通过 pix unshuffle 转成 2x2 psz 然后在这个大激活图上用conv；不用激活函数，只用 rmsnorm），尽管参数量非常小但很影响loss 的收敛（尤其是lpips）和gradnorm（小于1）。所以 magi1 vae 虽然追求vit 输入输出，但最后还是有几个conv layers，尽管channel非常的低。
+  - 训练
+    - 更大的 feature channel 可以对应着 compress larger regional pixels into one patch
+    - 大 latent channel 对 generative model 的 diffusion loss 不好加（能不能类似pca一下？）；直观上，压缩 latent channel 也会减少对信息的capacity，影响重建。
+    - dcae 在 downsampler 时候加 pixel-shuffle residual connector 利于更高压缩的优化。
+    - 1d tokens 在其所在的 mhca中，可能query学出来之后，和detr类似仍然具有locality，因此仍是局部编码。拥有高频、低频的regions可以被不同数量的 1d query-based tokens 表示。类似于学ROI。但是这1d tokens是一个黑盒，最好学成roi，因为这样保证了可组合性，之后生成模型好学，一旦他因为一些约束学成了全局高频，就彻底没法学了。
+    - kl loss 要加的很小，5e-3, 1e-4 这种。而且 kl loss 很容易 spike，weight 太大会导致整个loss全部被他带spike。理论上 kl loss 不是直接全部mean，而是要 sum reduction。但还是要看 loss weight（但后来我发现 1e-3 都嫌大了，而且有别的正则化比如decoder repa或者空间prior注入，kl未必要很大，大了反而冲突）。
+    - 千万不要sft tokenizer的 bottleneck层，不要做 16维变64维这种finetune。远远不如从头训。最好不要对 tokenizer 进行任何的sft，除了输入输出分辨率。
+    - sft detokenizer的意义：因为预测出来的latents一定是fake，detokenizer见过的都是real。这之间的gap完全靠detokenizer的先验在弥补，这很难量化
+    - 一些固有 artifact 的 patterns 是基本去除不掉的：
+      - 比如 vit decoder 的 patch 效应、 cnn decoder 的格点效应。一旦生成模型学不好就会显现，或者说，生成模型学差了会把 tokenizer 自身初始化的部分激发出来。这事无解，除了在 decoder 上加入先验，比如更细的 head。
+      - latent 感觉会继承 encoder 的固有 constant bias。比如高压 cnn vae latent 在重建差的时候（小人脸、树木、草地）都会形成一种一模一样的格点状 pattern，和语义无关。这些东西是在确定性 decoder 用一般的重建 loss 训出来的。我这种怀疑是因为更换 decoder 训练到收敛，发现这些 pattern 并没有消失，而是和新 decoder 自己的 bias 一起出现（比如 cnn decoder 换 vit decoder，本身格点没消失，同时又出现了 patch）
+  - 本质上
+    - tokenizer-encoder 是 feature extractor，把输入压缩；
+    - tokenizer-decoder 是 pixel-generator，把 encoder 的输出作为 condition，在 pixel space 做生成任务；
+    - decoder也在给encoder提供梯度，类似蒸馏。
+  - 对于生成
+    - 暴论：对于生成来说最容易学的latent space，是把高频全扔的latent space。为了提升视觉效果，再往 latent space 里面保留一些有意义的高频，但必须要扔掉数据集的高频噪声。不然没法学。低频是 low rank，高频是 full rank；高维 feature 不压缩做不了 latents，可能不是测度问题，可能是里面高频太多了，导致模型学不明白，需要把一些高频扔了。
+    - latent space 的设计空间极大，因为tokenizer的主要任务只是重建，重建和latent space看起来还没关系，剩下的全是支线任务。因此要搞正则化、搞特殊设计、甚至接一个proxy 生成模型（像mup），来引导latent space。因此latent space 其实想怎么样就怎么样，想怎么压缩就怎么压缩。
+    - 重建器一定要会生成；编码器一定要会重建
+      - 编码器产生的 latent space 一定要有可解释性，太复杂（比如模型的 intermediate features）根本就不适合作为一个 learning target
+      - 解码器的功能需要解藕：
+        - 功能一：作为 refiner，去生成一些细节；
+        - 功能二：作为 linear prober，去让 latent space 和 learning target 的距离尽量的近，这样才有可解释性。
+        - 因此，scale detokenizer 本身的出发点是错的，因为这样会导致 latent space 很不像 rgb，这都不是后验崩塌能解释的了的，目前想不出这个原因到底是什么。可以 scale refiner，但一定不能 scale prober。同理，在 latent 上直接作用 repa ，由于这个 repa 很轻量，就相当于额外解耦合了一个 prober。当然也可以直接在这个 prober 上作用一些 重建 loss。同理，rae 所用的 vision foundational model 的 output 也是接在 linear prober 上的特征，本身也有很强的可解释性。
+    - **一个易于学习的 latent space 所需的性质**
+      - **可解释性要无限逼近pixel**
+        - 这个可解释性就是 物体的空间结构，会在diffusion那一段细讲。目前理解就是：把一个在空域上缓慢变换的分布通过最优传输变成另一个缓慢变换的分布是容易的，跳脱的就很难。从宏观上说：建模要根据先验分布去建模，选一条 easy way。
+      - **后验分布要均匀，每个token要同分布，空域上每个token要尽可能地独立**
+        - **从 pixel region 到 token 的映射**：pixel space 中的一个 region 最好就被一个 token 编码，tokens 之间尽量相互不要干涉、最好相互独立（共现低）
+          - 这条性质的一个形象的例子：
+            - 正例：3 个 regions 编号 1 2 3，2 个 tokens 编号 A B，编码组合成 pair 可以是：(1, A) (2, A) (3, B)；
+            - 反例：不要 (1, A) (1, B) (2, B) (3, C)，因为如果 pixel space 的同一个 region 被 好几段 tokens 编码了，那么在生成的时候有可能产生学习不匹配的问题，尤其是生成模型带 sft 的情况，即，生成模型先在 A 上学，再 sft 到 A B 这个集合上，A 已经表示了一部分 1 了，这时候一个没怎么学好的 B 再掺和上，解码是时候拿到一个正确的 A 和一个错的 B，共现高直接出 artifacts
+            - 那么，对共现度低的 benefits 进行推广：比如2个tokens，前一个 token 生成错了，后一个 token 生成对的，解码的时候要前一个错 token 影响后一个 对的 token 所对应的 pixel region
+          - 更具体一点的例子：比如同一段视频，既被 N 个 tokens 编码，也被 N+M 个 tokens 编码，且后者 tokens 包含了前者。那么，后 M 个 tokens 和 前 N 个 tokens 会去编码同一块内容，往往 后 M 个 tokens 会学着编码 前 N 个 tokens 所没装下的高频信息。这时候，本来高频就很容易预测错，解码的时候就极其容易出现 A对B错 的情况，导致 artifacts。
+          - 具体实现：
+            - 因此 CNN/SWA 相比 attn 更适合编码器。如果非得要一般的 attn，至少也得搞 attn mask，这也能解释 video vae 中 temporal causal 的意义，即从物理上隔离开 pixel regions。直接避免同一块内容被多次编码。如果非要遇上同一块内容被多次编码的情况（比如变长编码），在 attn 中，还有一种比较 weak 的方案是用不同的 pe 进行隔离。
+        - **从 token 到 pixel region 的映射**：一个 token 不要编码好几个 pixel region，由上，因此最好 token 和所编码的 region 是双射
+          - 一般不会遇上用同一块 token 去对应多个 regions 的情况。因为就算变长编码，变的也是 token 的长度，regions 没变。
+          - 关于双射：因此 BPE 就是一种很好的编码策略，虽然视觉里面用这个压缩率差
+        - **每个 token 所包含的信息量尽可能的低**
+          - 这其实就意味着编码的 pixel region 越小越好，小到最小语义单元。因此前面说的 物理隔离 也对这事有好处。
+          - 不要一个 token 表示了太多东西，语义越多越难学，因为很难拉开不同知识之间的距离，很难做好空间划分（SVM那种）
+        - token 同分布：token 产生的机制和模块形式化要一模一样最好
+      - **频率要偏低频**
+        - 从带噪数据中，捕获真正有意义的低维流形
+      - 语义图好看、物体边缘清晰并随着位置连续变化、在 2d 空间上看起来有结构，就是 locality，这就是所谓的 diffusion 吃 repa。
+    - 8f16ch + dit 2x2 patchify v.s. 16f48ch + dit 1x1 patchify v.s. 32f128ch + dit 1x1 patchify
+      - 为什么 channel 不继续扩张做 32f，而 8f 效果训出来又不够好：空间结构问题
+  - 拓展功能的本质
+    - 变长编码的本质：仅需要解码器，就可以实现对高置信度tokens进行部分“解码”，并生成出剩下内容（通过mask手段，让解码器对ood的fake latents 无效）。所以，当“编码”仅仅是在存储表征的时候，变长“编码”毫无意义。除非“编码”编入了别的东西。
+    - 高压缩率的编码器：固定高压缩率的编码器有一个trivial解，就是 token shuffle。因此，如果编码还是只编表征，也毫无意义。
+  - 关于latent space 加噪
+    - 加高斯噪声
+      - 训练时候加，可以让decoder不感知 latent 的高频部分，从而本应对应高频的梯度传给encoder都是错的，从而高频编码能力会乱优化，encoder对高频的感知能力丧失，就去编码低频。
+      - sft detokenizer，让decoder 对带噪预测鲁棒，仅根据正确的低频进行decoding。本应被生成的高频靠decoder自己脑补（比如经过gan loss学习的锐化；其实var高频部分的codebook也collapsed）
+    - 加mask 噪声
+      - mask tokens 模拟的是一种 ood 情况。因此decoder可以仅根据高置信（其实就是预测正确）的predicted tokens进行解码，屏蔽 ood 之类出错的 tokens。这部分靠他自己脑补。
+  - 分析：latent space 
+    - 性质：指标与形状
+      - 早期，intrinsic matrix 是一个评价 latents 合理与否的指标。主成分值越小越好。
+      - 功率，低频到高频应该越来越低
+      - Shapiro-Wilk Test（夏皮罗-威尔克检验），逐个通道检验，每个通道上的 tokens 是否很好的满足高斯分布。如果不是，说明分布可能扭曲、多峰或者长尾（W-statistic 越接近 1 说明越像高斯分布），不利于 ldm 学习。可能 50 个样本就能查出来。
+      - ldm 应该各向同性，也就是 std大的通道要多要均匀，不要一个channel独大；另外通道之间要相互独立，可能latent 可视化出来会比较杂乱。这不是单单一个norm能解决的问题，这个涉及到每个channel上的token分布的学习，一家独大、分布非高斯都可能导致稍微一丁点误差在denorm之后被放大。因此，还是需要各种强大的正则化loss去约束 latent space 的形状，各个空间位置、各个通道位置上的形状。
+      - 通过 PCA 检测 每个 vector 之间是否均匀。正常的 latent，他的 token vectors 算出来的 PCA 的主分量特征值应该很低，0.1 这种，代表 vectors 均匀散布在一个空间；如果 PCA0 有 0.9 以上，说明 tokens 都共线了，说不定就是每个 sample 的 tokens 共线了 但 每个 sample 的线不一样。共线问题 KL 还检测不出来（因为可以满足一个 1d 高斯），SIGR 能检验（把高斯投影到随机各个 1d 空间上看是不是还是高斯，共线可能不可能）
+    - 修正技巧
+      - 正则化loss，如果希望所有token都map到同一个constant值，比如0 1 之类的，然后mse做loss，尤其是kl loss。这个会导致，当loss很低时，网络很可能把大部分位置学好了，但是个别刺头儿位置学不好，而恰恰这些个别位置容易导致dominant、产生各向异性。因此还有一种办法是，就是不要全去map到constant值，而是map到他们的均值，就倾向各向同性。
+      - kl loss 越大，高频部分谱功率越大，下游生成越难，很明显看出 loss 下不去（因为有一个潜在的加噪过程，可能指的是sample）。这个loss weight 在 1e-4 往上的时候，就明显有这种坏处了。
+      - 正则化项，有可能 L2 norm 输出的正则化 loss 要比 cosine func 输出的正则化 loss 更适合下游生成，因为 L2 度量欧氏空间、产生的空间更平滑
+  - 训推性质
+    - 内推能力（往往用于tiling）的来源：左端点。不管是什么算子（cnn这种局部算子，或者是 causal attn 这种可以延展的特别长的），他既然在 $[a1, a2, a3, ...]$ 这种序列上做自回归的学习，那么就能够直接在 $[a1] , [a1, a2]$ 这种更短的序列上推理。如果要更长的序列推理，就要 sliding window
+    - 自回归时序上推理的误差累积的来源：可能是感受野不足（更本质的原因应该是空间划分不清，大感受野相当于更多的输入信号，类似于更多的condition，这样输出的就会更准），因为对于一段长序列的后面几个元素，自回归和双向没区别，而对于左端点的部分，会少了右边的信息而产生误差，而在推理阶段，这种误差会一直向右传播导致误差。因此，我有一种猜测，如果对于一个高压 vae，我给他一个足够大chunk（类似于 prefilling）做双向运算，然后再向右做 full causal，是不是就能解决误差问题。
