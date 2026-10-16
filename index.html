@@ -1,263 +1,426 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-
 	<!-- Global site tag (gtag.js) - Google Analytics -->
 	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-172831425-1"></script>
 	<script>
 	window.dataLayer = window.dataLayer || [];
 	function gtag(){dataLayer.push(arguments);}
 	gtag('js', new Date());
-
 	gtag('config', 'UA-172831425-1');
 	</script>
 
-	<meta content="en-us" http-equiv="Content-Language">
-	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-	<title>Yao Teng - 滕尧</title>
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+	<meta name="theme-color" content="#0e1014">
+	<meta name="description" content="Yao Teng (滕尧) - PhD student at HKU. Research on image/video generation, world models and object detection.">
+	<title>Yao Teng - 滕尧</title>
+
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Sans+SC:wght@500&family=Open+Sans&display=swap" rel="stylesheet">
-	<link rel="stylesheet" href="css/style.css">
-	<script src="https://kit.fontawesome.com/f48e169a29.js" crossorigin="anonymous"></script>
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- MathJax -->
-    <!-- <script type="text/javascript"
-      src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-    </script> -->
-
+	<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@500;600&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="css/home.css">
+	<script>document.documentElement.classList.add('js');</script>
 </head>
 
 <body>
-	<div class="container">
-		<div style="text-align: right; margin: 12px 0 6px 0;">
-			<a href="blog/" style="font-family: 'SimHei', 'Heiti SC', 'Noto Sans SC', sans-serif; font-size: 1.6em; font-weight: bold;">Blog</a>
-		</div>
-		<div class="row">
-			<div class="col-sm-3">
-				<br/><br/>
-				<center><img src="figures/tengyao_new.jpg" width=80% alt="Yao Teng"/></center>
-			</div>
-		
-			<div class="col-sm-9">
-				<div class="page-header">
-					<div class="row">
-						<div class="col-sm-9">
-							<h1><font face="Noto Sans SC">Yao Teng <span lang="zh-cn">(滕尧)</span></font></h1>
+	<canvas id="fog"></canvas>
+	<div class="vignette"></div>
+	<div class="grain"></div>
+	<div class="lightning"></div>
+
+	<header class="nav">
+		<a class="brand" href="#top">Yao<i>.</i>Teng</a>
+		<nav class="links">
+			<a href="#about">About</a>
+			<a href="#path">Path</a>
+			<a href="#research">Research</a>
+			<a href="#awards">Awards</a>
+			<a class="blog" href="blog/">Blog &rarr;</a>
+			<button class="sound" id="sound" type="button" aria-pressed="false" aria-label="Toggle ambient sound" title="Ambient sound"><span class="eq"><i></i><i></i><i></i><i></i></span><span class="lbl">Sound off</span></button>
+		</nav>
+	</header>
+
+	<main id="top">
+		<!-- ================= HERO ================= -->
+		<div class="wrap">
+			<div class="hero">
+				<div class="hero-grid">
+					<div>
+						<div class="eyebrow">PhD Student &middot; HKU</div>
+						<h1>Yao Teng<span class="zh">滕 尧</span></h1>
+						<p class="role">&gt; <span id="role-text"></span><span class="caret"></span></p>
+						<div class="cta">
+							<a class="btn primary" href="#research">Selected research</a>
+							<a class="btn" href="CV_YaoTeng.pdf" target="_blank" rel="noopener">CV</a>
+							<a class="btn" href="https://scholar.google.com.hk/citations?user=eLIsViIAAAAJ&hl=en" target="_blank" rel="noopener">Scholar</a>
+							<a class="btn" href="https://github.com/tyshiwo1" target="_blank" rel="noopener">GitHub</a>
+							<a class="btn" href="mailto:tengyao19980325@gmail.com">Email</a>
 						</div>
 					</div>
-					<div class="row">
-						<div class="col-sm-7">
-							<address>
-								<font style="font-size: 12.5pt;">
-								<br/>
-								</font>
-							</address>
+					<div class="portrait">
+						<div class="frame"><img src="figures/tengyao_new.jpg" alt="Yao Teng"></div>
+						<span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+					</div>
+				</div>
+				<div class="scroll-hint">scroll</div>
+			</div>
+		</div>
+
+		<!-- ================= ABOUT + PATH ================= -->
+		<div class="wrap">
+			<section id="about" class="reveal">
+				<h2 class="sec-title"><small>01</small>About</h2>
+				<div class="about-grid">
+					<div class="about-text">
+						<p>
+							I am a third-year PhD student at <b>The University of Hong Kong</b>,
+							supervised by <a href="https://xh-liu.github.io/" target="_blank" rel="noopener">Xihui Liu</a>.
+						</p>
+						<p>
+							Before that, I was an M.Sc. student in the
+							<a href="http://mcg.nju.edu.cn/en/index.html" target="_blank" rel="noopener">MCG Group</a>,
+							<a href="https://www.nju.edu.cn/EN/7f/6b/c7136a163691/page.htm" target="_blank" rel="noopener">Department of Computer Science and Technology</a>,
+							<a href="https://www.nju.edu.cn/EN/main.htm" target="_blank" rel="noopener">Nanjing University</a>,
+							supervised by <a href="http://wanglimin.github.io/" target="_blank" rel="noopener">Prof. Limin Wang</a>
+							(2020 &ndash; 2023), and received my B.Sc. in Software Engineering from Xidian University in 2020.
+						</p>
+						<p>My research focuses on image / video generation and object detection.</p>
+						<div class="focus">
+							<span class="chip">video generation</span>
+							<span class="chip">video VAE</span>
+							<span class="chip">autoregressive T2I</span>
+							<span class="chip">speculative decoding</span>
+							<span class="chip">world model</span>
+							<span class="chip">object detection</span>
 						</div>
-						<div class="col-sm-5">	
-							<font style="font-size: 12.5pt;">
-							<a href = "mailto: tengyao19980325@gmail.com" target="'_blank"> <i class="fa-solid fa-envelope"  ></i> </a> Email:  <a href = "mailto: tengyao19980325@gmail.com" target="'_blank"> tengyao19980325@gmail.com </a> <br>
-							<a href = ""><i class="fa-brands fa-github"></i></a> Github: <a href="https://github.com/tyshiwo1" target="'_blank">tyshiwo1</a>
-							</font>
-							<br/><br/>
+					</div>
+
+					<div id="path">
+						<div class="track-label">Education</div>
+						<ul class="timeline">
+							<li class="now">
+								<div class="when">2023 &ndash; PRESENT</div>
+								<div class="what">The University of Hong Kong</div>
+								<div class="sub">PhD &middot; HKU MMLab</div>
+							</li>
+							<li>
+								<div class="when">2020 &ndash; 2023</div>
+								<div class="what">Nanjing University</div>
+								<div class="sub">M.Sc. &middot; MCG Group</div>
+							</li>
+							<li>
+								<div class="when">2016 &ndash; 2020</div>
+								<div class="what">Xidian University</div>
+								<div class="sub">B.Sc. &middot; Software Engineering</div>
+							</li>
+						</ul>
+
+						<div class="track-label">Internships <small>during PhD</small></div>
+						<ul class="timeline">
+							<li class="now">
+								<div class="when">2026.02 &ndash; PRESENT</div>
+								<div class="what">Tencent</div>
+								<div class="sub">Research intern &middot; World Model</div>
+							</li>
+							<li>
+								<div class="when">2025.03 &ndash; 2026.02</div>
+								<div class="what">ByteDance</div>
+								<div class="sub">Research intern &middot; Video VAE &amp; Text-to-Video Generation</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</section>
+		</div>
+
+		<!-- ================= RESEARCH ================= -->
+		<div class="wrap">
+			<section id="research">
+				<h2 class="sec-title reveal"><small>02</small>Selected Research <span class="aux"><a href="https://scholar.google.com.hk/citations?user=eLIsViIAAAAJ&hl=en" target="_blank" rel="noopener">[ Google Scholar ]</a></span></h2>
+
+				<div class="filters reveal">
+					<button class="on" data-filter="all">All</button>
+					<button data-filter="survey">Survey</button>
+					<button data-filter="gen">Generation</button>
+					<button data-filter="accel">Acceleration</button>
+					<button data-filter="det">Detection &amp; Scene Graph</button>
+				</div>
+
+				<div class="papers">
+
+					<article class="paper reveal" data-tags="survey">
+						<div class="thumb"><img src="figures/llm_arch_survey.png" alt="Towards Next-Generation Architectures of Large Language Models: A Survey"></div>
+						<div>
+							<div class="meta">
+								<span class="venue">Preprint &middot; 2026</span>
+								<span class="tag">survey</span>
+								<span class="badge">NEW</span>
+							</div>
+							<h3>Towards Next-Generation Architectures of Large Language Models: A Survey</h3>
+							<p class="authors"><b>Yao Teng</b>&dagger;, Guoxuan Chen&dagger;, Yimeng Chen*, Han Shi*, Piotr Pi&#281;kos, Jie Ran, Yutao Zeng, Chuanyang Zheng, Jingyao Li, Li Nanbo, Haoli Bai, Chao Huang, Xihui Liu, Di He, Weiyang Liu and J&uuml;rgen Schmidhuber</p>
+							<p class="blurb">A systematic overview of how LLM architectures are evolving beyond the canonical Transformer: efficient attention, linear-complexity sequence models, MoE, multi-token prediction and more.</p>
+							<div class="plinks">
+								<a href="https://www.preprints.org/manuscript/202610.1532/v1" target="_blank" rel="noopener">Paper</a>
+								<a href="https://github.com/SurveyLLMArch/LLMArchitectureSurvey" target="_blank" rel="noopener">Code</a>
+							</div>
+						</div>
+					</article>
+
+					<article class="paper reveal" data-tags="gen">
+						<div class="thumb"><img src="figures/onedva.png" alt="Adaptive 1D Video Diffusion Autoencoder"></div>
+						<div>
+							<div class="meta"><span class="venue">arXiv 2026</span><span class="tag">video tokenizer</span></div>
+							<h3>Adaptive 1D Video Diffusion Autoencoder</h3>
+							<p class="authors"><b>Yao Teng</b>, Minxuan Lin, Xian Liu, Shuai Wang, Xiao Yang and Xihui Liu</p>
+							<p class="blurb">Diffusion-based video generation on a one-dimensional video diffusion tokenizer.</p>
+							<div class="plinks"><a href="https://arxiv.org/abs/2602.04220" target="_blank" rel="noopener">Paper</a></div>
+						</div>
+					</article>
+
+					<article class="paper reveal" data-tags="accel gen">
+						<div class="thumb"><img src="figures/sjd++.png" alt="SJD++"></div>
+						<div>
+							<div class="meta"><span class="venue">IEEE T-PAMI</span><span class="tag">autoregressive T2I</span></div>
+							<h3>SJD++: Improved Speculative Jacobi Decoding for Training-free Acceleration of Discrete Auto-regressive Text-to-Image Generation</h3>
+							<p class="authors"><b>Yao Teng</b>, Zhihuan Jiang, Han Shi, Xian Liu, Xuefei Ning, Guohao Dai, Yu Wang, Zhenguo Li and Xihui Liu</p>
+							<p class="blurb">Improvement over SJD in speed.</p>
+							<div class="plinks"><a href="https://arxiv.org/abs/2512.07503" target="_blank" rel="noopener">Paper</a></div>
+						</div>
+					</article>
+
+					<article class="paper reveal" data-tags="accel gen">
+						<div class="thumb"><img src="figures/sjd2.png" alt="SJD2"></div>
+						<div>
+							<div class="meta"><span class="venue">NeurIPS 2025</span><span class="tag">autoregressive T2I</span></div>
+							<h3>Speculative Jacobi-Denoising Decoding for Accelerating Autoregressive Text-to-image Generation</h3>
+							<p class="authors"><b>Yao Teng</b>, Fuyun Wang, Xian Liu, Zhekai Chen, Han Shi, Yu Wang, Zhenguo Li, Weiyang Liu, Difan Zou and Xihui Liu</p>
+							<p class="blurb">Unifying denoising and autoregressive decoding.</p>
+							<div class="plinks"><a href="https://arxiv.org/abs/2510.08994" target="_blank" rel="noopener">Paper</a></div>
+						</div>
+					</article>
+
+					<article class="paper reveal" data-tags="accel gen">
+						<div class="thumb"><img src="figures/sjd.png" alt="SJD"></div>
+						<div>
+							<div class="meta"><span class="venue">ICLR 2025</span><span class="tag">autoregressive T2I</span></div>
+							<h3>Accelerating Auto-regressive Text-to-Image Generation with Training-free Speculative Jacobi Decoding</h3>
+							<p class="authors"><b>Yao Teng</b>, Han Shi, Xian Liu, Xuefei Ning, Guohao Dai, Yu Wang, Zhenguo Li and Xihui Liu</p>
+							<p class="blurb">The first training-free acceleration method for T2I AR models.</p>
+							<div class="plinks">
+								<a href="https://arxiv.org/abs/2410.01699" target="_blank" rel="noopener">Paper</a>
+								<a href="https://github.com/tyshiwo1/SJD-T2I-AR" target="_blank" rel="noopener">Code</a>
+							</div>
+						</div>
+					</article>
+
+					<article class="paper reveal" data-tags="gen">
+						<div class="thumb"><img src="figures/dim.png" alt="DiM"></div>
+						<div>
+							<div class="meta"><span class="venue">arXiv 2024</span><span class="tag">diffusion</span></div>
+							<h3>DiM: Diffusion Mamba for Efficient High-Resolution Image Synthesis</h3>
+							<p class="authors"><b>Yao Teng</b>, Yue Wu, Han Shi, Xuefei Ning, Guohao Dai, Yu Wang, Zhenguo Li and Xihui Liu</p>
+							<p class="blurb">A Mamba-based diffusion model for image generation.</p>
+							<div class="plinks">
+								<a href="https://arxiv.org/pdf/2405.14224" target="_blank" rel="noopener">Paper</a>
+								<a href="https://github.com/tyshiwo1/DiM-DiffusionMamba" target="_blank" rel="noopener">Code</a>
+							</div>
+						</div>
+					</article>
+
+					<article class="paper reveal" data-tags="gen">
+						<div class="thumb"><img src="figures/dragavideo.png" alt="Drag-A-Video"></div>
+						<div>
+							<div class="meta"><span class="venue">arXiv 2023</span><span class="tag">video editing</span></div>
+							<h3>Drag-A-Video: Non-rigid Video Editing with Point-based Interaction</h3>
+							<p class="authors"><b>Yao Teng</b>, Enze Xie, Yue Wu, Haoyu Han, Zhenguo Li and Xihui Liu</p>
+							<p class="blurb">The &ldquo;drag&rdquo; in video editing.</p>
+							<div class="plinks"><a href="https://arxiv.org/pdf/2312.02936.pdf" target="_blank" rel="noopener">Paper</a></div>
+						</div>
+					</article>
+
+					<article class="paper reveal" data-tags="det">
+						<div class="thumb"><img src="figures/stage_interactor.jpg" alt="StageInteractor"></div>
+						<div>
+							<div class="meta"><span class="venue">ICCV 2023</span><span class="tag">detection</span></div>
+							<h3>StageInteractor: Query-based Object Detector with Cross-stage Interaction</h3>
+							<p class="authors"><b>Yao Teng</b>, Haisong Liu, Sheng Guo and Limin Wang</p>
+							<p class="blurb">New label assignment and feature interaction for query-based object detection.</p>
+							<div class="plinks">
+								<a href="https://openaccess.thecvf.com/content/ICCV2023/papers/Teng_StageInteractor_Query-based_Object_Detector_with_Cross-stage_Interaction_ICCV_2023_paper.pdf" target="_blank" rel="noopener">Paper</a>
+								<a href="https://github.com/MCG-NJU/StageInteractor" target="_blank" rel="noopener">Code</a>
+							</div>
+						</div>
+					</article>
+
+					<article class="paper reveal" data-tags="det">
+						<div class="thumb"><img src="figures/logn.jpg" alt="LogN"></div>
+						<div>
+							<div class="meta"><span class="venue">IJCV</span><span class="tag">detection</span></div>
+							<h3>Logit Normalization for Long-tail Object Detection</h3>
+							<p class="authors">Liang Zhao*, <b>Yao Teng*</b> and Limin Wang</p>
+							<p class="blurb">A test-time batch normalization to calibrate logits for long-tail object detection.</p>
+							<div class="plinks">
+								<a href="https://arxiv.org/pdf/2203.17020.pdf" target="_blank" rel="noopener">Paper</a>
+								<a href="https://github.com/MCG-NJU/LogN" target="_blank" rel="noopener">Code</a>
+							</div>
+						</div>
+					</article>
+
+					<article class="paper reveal" data-tags="det">
+						<div class="thumb"><img src="figures/ss-rcnn.jpg" alt="Structured Sparse R-CNN"></div>
+						<div>
+							<div class="meta"><span class="venue">CVPR 2022</span><span class="tag">scene graph</span></div>
+							<h3>Structured Sparse R-CNN for Direct Scene Graph Generation</h3>
+							<p class="authors"><b>Yao Teng</b> and Limin Wang</p>
+							<p class="blurb">The first one-stage end-to-end scene graph generation framework without an extra object detector at inference.</p>
+							<div class="plinks">
+								<a href="https://openaccess.thecvf.com/content/CVPR2022/papers/Teng_Structured_Sparse_R-CNN_for_Direct_Scene_Graph_Generation_CVPR_2022_paper.pdf" target="_blank" rel="noopener">Paper</a>
+								<a href="https://github.com/MCG-NJU/Structured-Sparse-RCNN" target="_blank" rel="noopener">Code</a>
+								<a href="https://zhuanlan.zhihu.com/p/492255428" target="_blank" rel="noopener">Zhihu</a>
+							</div>
+						</div>
+					</article>
+
+					<article class="paper reveal" data-tags="det">
+						<div class="thumb"><img src="figures/trace.jpg" alt="TRACE"></div>
+						<div>
+							<div class="meta"><span class="venue">ICCV 2021</span><span class="tag">scene graph</span></div>
+							<h3>Target Adaptive Context Aggregation for Video Scene Graph Generation</h3>
+							<p class="authors"><b>Yao Teng</b>, Limin Wang, Zhifeng Li and Gangshan Wu</p>
+							<p class="blurb">The first framework unifying frame-level and video-level scene graph generation.</p>
+							<div class="plinks">
+								<a href="https://openaccess.thecvf.com/content/ICCV2021/papers/Teng_Target_Adaptive_Context_Aggregation_for_Video_Scene_Graph_Generation_ICCV_2021_paper.pdf" target="_blank" rel="noopener">Paper</a>
+								<a href="https://github.com/MCG-NJU/TRACE" target="_blank" rel="noopener">Code</a>
+							</div>
+						</div>
+					</article>
+
+				</div>
+
+				<div class="co-block reveal">
+					<h3 class="co-title">Also Co-authored <small id="co-count"></small></h3>
+					<div class="co-deck" id="co-deck">
+						<div class="co-tabs" role="tablist">
+							<button class="co-tab on" role="tab" data-i="0"><span class="v">arXiv 2026</span><span class="n">UniDDT</span></button>
+							<button class="co-tab" role="tab" data-i="1"><span class="v">arXiv 2026</span><span class="n">Cubic Discrete Diffusion</span></button>
+							<button class="co-tab" role="tab" data-i="2"><span class="v">AAAI 2026</span><span class="n">Self-NPO</span></button>
+							<button class="co-tab" role="tab" data-i="3"><span class="v">ICCV 2025</span><span class="n">TokenBridge</span></button>
+							<button class="co-tab" role="tab" data-i="4"><span class="v">T-PAMI 2025</span><span class="n">Deep Equilibrium Det. &amp; Seg.</span></button>
+							<button class="co-tab" role="tab" data-i="5"><span class="v">arXiv 2025</span><span class="n">Personalized T2I with AR Models</span></button>
+							<button class="co-tab" role="tab" data-i="6"><span class="v">arXiv 2025</span><span class="n">Representation-Aligned Latent</span></button>
+							<button class="co-tab" role="tab" data-i="7"><span class="v">arXiv 2024</span><span class="n">CycleHOI</span></button>
+							<button class="co-tab" role="tab" data-i="8"><span class="v">ICCV 2023</span><span class="n">Deep Equilibrium Detection</span></button>
+							<button class="co-tab" role="tab" data-i="9"><span class="v">ICCV 2023</span><span class="n">SparseBEV</span></button>
+						</div>
+						<div class="co-stage">
+							<div class="co-bar"><i></i></div>
+
+							<article class="co-card on" data-tags="gen">
+								<div class="co-venue">ECCV 2026</div>
+								<h4>UniDDT: Unifying Multimodal Understanding and Generation with Decoupled Diffusion Transformer</h4>
+								<p class="co-authors">Shuai Wang, Liang Li, Yang Chen, Ruopeng Gao, <b>Yao Teng</b> and Limin Wang</p>
+								<div class="plinks"><a href="https://arxiv.org/abs/2606.16255" target="_blank" rel="noopener">Paper</a></div>
+							</article>
+
+							<article class="co-card" data-tags="gen">
+								<div class="co-venue">arXiv 2026</div>
+								<h4>Cubic Discrete Diffusion: Discrete Visual Generation on High-Dimensional Representation Tokens</h4>
+								<p class="co-authors">Yuqing Wang, Chuofan Ma, Zhijie Lin, <b>Yao Teng</b>, Lijun Yu, Shuai Wang, Jiaming Han, Jiashi Feng, Yi Jiang and Xihui Liu</p>
+								<div class="plinks"><a href="https://arxiv.org/abs/2603.19232" target="_blank" rel="noopener">Paper</a></div>
+							</article>
+
+							<article class="co-card" data-tags="gen">
+								<div class="co-venue">AAAI 2026</div>
+								<h4>Self-NPO: Negative Preference Optimization of Diffusion Models by Simply Learning from Itself without Explicit Preference Annotations</h4>
+								<p class="co-authors">Fu-Yun Wang, Keqiang Sun, <b>Yao Teng</b>, Xihui Liu, Jiaming Song and Hongsheng Li</p>
+								<div class="plinks"><a href="https://arxiv.org/abs/2505.11777" target="_blank" rel="noopener">Paper</a></div>
+							</article>
+
+							<article class="co-card" data-tags="gen">
+								<div class="co-venue">ICCV 2025</div>
+								<h4>Bridging Continuous and Discrete Tokens for Autoregressive Visual Generation</h4>
+								<p class="co-authors">Yuqing Wang, Zhijie Lin, <b>Yao Teng</b>, Yuanzhi Zhu, Shuhuai Ren, Jiashi Feng and Xihui Liu</p>
+								<div class="plinks"><a href="https://arxiv.org/abs/2503.16430" target="_blank" rel="noopener">Paper</a></div>
+							</article>
+
+							<article class="co-card" data-tags="det">
+								<div class="co-venue">IEEE T-PAMI 2025</div>
+								<h4>Deep Equilibrium Object Detection and Segmentation</h4>
+								<p class="co-authors">Shuai Wang, <b>Yao Teng</b> and Limin Wang</p>
+								<div class="plinks"><a href="https://mcg.nju.edu.cn/publication.html" target="_blank" rel="noopener">Page</a></div>
+							</article>
+
+							<article class="co-card" data-tags="gen">
+								<div class="co-venue">arXiv 2025</div>
+								<h4>Personalized Text-to-Image Generation with Auto-Regressive Models</h4>
+								<p class="co-authors">Kaiyue Sun, Xian Liu, <b>Yao Teng</b> and Xihui Liu</p>
+								<div class="plinks"><a href="https://arxiv.org/abs/2504.13162" target="_blank" rel="noopener">Paper</a></div>
+							</article>
+
+							<article class="co-card" data-tags="gen">
+								<div class="co-venue">arXiv 2025</div>
+								<h4>Exploring Representation-Aligned Latent Space for Better Generation</h4>
+								<p class="co-authors">Wanghan Xu, Xiaoyu Yue, Zidong Wang, <b>Yao Teng</b>, Wenlong Zhang, Xihui Liu, Luping Zhou, Wanli Ouyang and Lei Bai</p>
+								<div class="plinks"><a href="https://arxiv.org/abs/2502.00359" target="_blank" rel="noopener">Paper</a></div>
+							</article>
+
+							<article class="co-card" data-tags="det">
+								<div class="co-venue">arXiv 2024</div>
+								<h4>CycleHOI: Improving Human-Object Interaction Detection with Cycle Consistency of Detection and Generation</h4>
+								<p class="co-authors">Yisen Wang, <b>Yao Teng</b> and Limin Wang</p>
+								<div class="plinks"><a href="https://arxiv.org/abs/2407.11433" target="_blank" rel="noopener">Paper</a></div>
+							</article>
+
+							<article class="co-card" data-tags="det">
+								<div class="co-venue">ICCV 2023</div>
+								<h4>Deep Equilibrium Object Detection</h4>
+								<p class="co-authors">Shuai Wang, <b>Yao Teng</b> and Limin Wang</p>
+								<div class="plinks"><a href="https://arxiv.org/abs/2308.09564" target="_blank" rel="noopener">Paper</a></div>
+							</article>
+
+							<article class="co-card" data-tags="det">
+								<div class="co-venue">ICCV 2023</div>
+								<h4>SparseBEV: High-Performance Sparse 3D Object Detection from Multi-Camera Videos</h4>
+								<p class="co-authors">Haisong Liu, <b>Yao Teng</b>, Tao Lu, Haiguang Wang and Limin Wang</p>
+								<div class="plinks"><a href="https://arxiv.org/abs/2308.09244" target="_blank" rel="noopener">Paper</a></div>
+							</article>
 						</div>
 					</div>
 				</div>
-			</div>
-			<br><br>
+			</section>
 		</div>
 
+		<!-- ================= AWARDS ================= -->
+		<div class="wrap">
+			<section id="awards">
+				<h2 class="sec-title reveal"><small>03</small>Selected Awards</h2>
+				<ul class="awards reveal">
+					<li><span class="yr">2021</span><span class="t">National Scholarship for Postgraduates<small>Nanjing University</small></span></li>
+					<li><span class="yr">2021</span><span class="t">Pacemaker to Outstanding Graduate Student<small>Nanjing University</small></span></li>
+					<li><span class="yr">2021</span><span class="t">1st Prize, Scholarship for Postgraduate Students<small>Nanjing University</small></span></li>
+					<li><span class="yr">2019</span><span class="t">Silver Medal, The 2019 ICPC China Shaanxi Provincial Programming Contest<small>Xidian University</small></span></li>
+					<li><span class="yr">2016 &ndash; 2018</span><span class="t">2nd Award, University Scholarship<small>Xidian University</small></span></li>
+				</ul>
+			</section>
+		</div>
+	</main>
 
-	<h2>About Me <font size="3"> [ <a href="CV_YaoTeng.pdf" target="'_blank">CV</a> ] </h2>
-	<table border="1" style="border-width: 0px;">
-		<tbody>
-			<tr>
-				<td style="border-style: none; border-width: medium;">
-					<p style="margin-top: 0px; margin-bottom: 3px; line-height: 1.2;"><font face=Helvetica style="font-size: 1.05em;">
-					I am a third-year PHD student in The university of Hong Kong, supervised by <a href="https://xh-liu.github.io/" target="'_blank">Xihui Liu</a>. <br>
-                    <br>
-                    I was a M.Sc. student in the <a href="http://mcg.nju.edu.cn/en/index.html" target="'_blank">MCG Group</a>, <a href="https://www.nju.edu.cn/EN/7f/6b/c7136a163691/page.htm" target="'_blank">Department of Computer Science and Technology</a>, <a href="https://www.nju.edu.cn/EN/main.htm" target="'_blank"> Nanjing University</a>, supervised by <a href="http://wanglimin.github.io/" target="'_blank">Prof. Limin Wang</a>, from 2020 to 2023. <br>
-					<br>
-					Previously, I obtained the B.Sc. degree from Software Engineering, Xidian University in 2020.  <br>
-					<br>
-					My researches focus on image/video generation and object detection.  <br>
-					
-				</td>
-			</tr>
-		</tbody>
-	</table>
+	<footer>
+		<div class="wrap">
+			<blockquote class="epi" style="margin-left:auto;margin-right:auto;border:0;padding:0;">
+				More willingness to do non-flashy work in order to improve the final model;<br>
+				Less ego enabling org charts to scale slightly.
+				<cite>&mdash; <a href="https://www.interconnects.ai/p/notes-from-inside-chinas-ai-labs" target="_blank" rel="noopener">Nathan Lambert</a></cite>
+			</blockquote>
+			<div class="foot-meta">&copy; <span id="year">2026</span> Yao Teng &middot; <a href="blog/">Blog</a></div>
+			<div class="map">
+				<script type='text/javascript' id='clustrmaps' src='//cdn.clustrmaps.com/map_v2.js?cl=ff0202&w=155&t=n&d=S8GixmBxbfw9KGb7Jf6Zh1rT-XqpkzRGs7HO_MYdewM&co=68c0ff&ct=ffffff&cmo=eeff00&cmn=f6a2ff'></script>
+			</div>
+		</div>
+	</footer>
 
-	<h2>Internship Experience</h2>
-		<font style="line-height: 1.5;font-size: 1.05em;">
-			<ul>
-				<li>2025.3 - 2026.2, ByteDance. Working on Video VAE and Text-to-Video Generation.</li>
-				<li>2026.2 - present, Tencent. Working on World Model.</li>			</ul>
-		</font>
-
-	<h2>Research  <font size="3"> [ <a href="https://scholar.google.com.hk/citations?user=eLIsViIAAAAJ&hl=en" target="'_blank">Google Scholar</a> ] </font> </h2>
-	<table style="border-width: 2px;">
-
-		<tbody><tr></tr>
-			<td width="30%" valign="middle"><p><img src="figures/onedva.png" width=90% alt="ISL" style="border-style: none" align="top"></p></td>
-			<td width="70%" valign="middle"><p style="margin-top: 3px; margin-bottom: 3px; line-height: 1.25;"> 
-				<b>Adaptive 1D Video Diffusion Autoencoder </b><br>
-				<strong>Yao Teng</strong>, Minxuan Lin, Xian Liu, Shuai Wang, Xiao Yang and Xihui Liu<br>
-				<em>Under review</em>.<br>
-				<alert>Diffusion-based video generation on one-dimensional video diffusion tokenizer. </alert><br>
-			[ <a href="https://arxiv.org/abs/2602.04220" target="'_blank">Paper</a> ]
-			</p></td></tr>
-		</tbody>
-
-		<tbody><tr></tr>
-			<td width="30%" valign="middle"><p><img src="figures/sjd++.png" width=90% alt="ISL" style="border-style: none" align="top"></p></td>
-			<td width="70%" valign="middle"><p style="margin-top: 3px; margin-bottom: 3px; line-height: 1.25;"> 
-				<b>SJD++: Improved Speculative Jacobi Decoding for Training-free Acceleration of Discrete Auto-regressive Text-to-Image Generation </b><br>
-				<strong>Yao Teng</strong>, Zhihuan Jiang, Han Shi, Xian Liu, Xuefei Ning, Guohao Dai, Yu Wang, Zhenguo Li and Xihui Liu<br>
-				<em>IEEE Transactions on Pattern Analysis and Machine Intelligence (T-PAMI)</em>.<br>
-				<alert>Improvement over SJD in speed. </alert><br>
-			[ <a href="https://arxiv.org/abs/2512.07503" target="'_blank">Paper</a> ]
-			</p></td></tr>
-		</tbody>
-
-		<tbody><tr></tr>
-			<td width="30%" valign="middle"><p><img src="figures/sjd2.png" width=90% alt="ISL" style="border-style: none" align="top"></p></td>
-			<td width="70%" valign="middle"><p style="margin-top: 3px; margin-bottom: 3px; line-height: 1.25;"> 
-				<b>Speculative Jacobi-Denoising Decoding for Accelerating Autoregressive Text-to-image Generation </b><br>
-				<strong>Yao Teng</strong>, Fuyun Wang, Xian Liu, Zhekai Chen, Han Shi, Yu Wang, Zhenguo Li, Weiyang Liu, Difan Zou, and Xihui Liu<br>
-				<em>Neurips 2025</em>.<br>
-				<alert>Unifying denoising and autoregressive decoding. </alert><br>
-			[ <a href="https://arxiv.org/abs/2510.08994" target="'_blank">Paper</a> ]
-			</p></td></tr>
-		</tbody>
-
-        <tbody><tr></tr>
-			<td width="30%" valign="middle"><p><img src="figures/sjd.png" width=90% alt="ISL" style="border-style: none" align="top"></p></td>
-			<td width="70%" valign="middle"><p style="margin-top: 3px; margin-bottom: 3px; line-height: 1.25;"> 
-				<b>Accelerating Auto-regressive Text-to-Image Generation with Training-free Speculative Jacobi Decoding </b><br>
-				<strong>Yao Teng</strong>, Han Shi, Xian Liu, Xuefei Ning, Guohao Dai, Yu Wang, Zhenguo Li and Xihui Liu<br>
-				<em>ICLR 2025</em>.<br>
-				<alert>The first training-free acceleration method for T2I AR models. </alert><br>
-			[ <a href="https://arxiv.org/abs/2410.01699" target="'_blank">Paper</a> ]
-			[ <a href="https://github.com/tyshiwo1/SJD-T2I-AR" target="'_blank">Code</a> ]
-			</p></td></tr>
-		</tbody>
-		
-		<tbody><tr>
-			<td width="30%" valign="middle"><p><img src="figures/dim.png" width=90% alt="ISL" style="border-style: none" align="top"></p></td>
-			<td width="70%" valign="middle"><p style="margin-top: 3px; margin-bottom: 3px; line-height: 1.25;"> 
-				<b>DiM: Diffusion Mamba for Efficient High-Resolution Image Synthesis </b><br>
-				<strong>Yao Teng</strong>, Yue Wu, Han Shi, Xuefei Ning, Guohao Dai, Yu Wang, Zhenguo Li and Xihui Liu<br>
-				<em>arxiv preprint 2024</em>.<br>
-				<alert>A Mamba-based diffusion model for image generation. </alert><br>
-			[ <a href="https://arxiv.org/pdf/2405.14224" target="'_blank">Paper</a> ]
-			[ <a href="https://github.com/tyshiwo1/DiM-DiffusionMamba" target="'_blank">Code</a> ]
-			</p></td></tr>
-		</tbody>
-
-		<tbody><tr>
-			<td width="30%" valign="middle"><p><img src="figures/dragavideo.png" width=90% alt="ISL" style="border-style: none" align="top"></p></td>
-			<td width="70%" valign="middle"><p style="margin-top: 3px; margin-bottom: 3px; line-height: 1.25;"> 
-				<b>Drag-A-Video: Non-rigid Video Editing with Point-based Interaction </b><br>
-				<strong>Yao Teng</strong>, Enze Xie, Yue Wu, Haoyu Han, Zhenguo Li and Xihui Liu<br>
-				<em>arxiv preprint 2023</em>.<br>
-				<alert>The "drag" in video editing. </alert><br>
-			[ <a href="https://arxiv.org/pdf/2312.02936.pdf" target="'_blank">Paper</a> ]
-			</p></td></tr>
-		</tbody>
-        
-        <tbody><tr>
-			<td width="30%" valign="middle"><p><img src="figures/stage_interactor.jpg" width=90% alt="ISL" style="border-style: none" align="top"></p></td>
-			<td width="70%" valign="middle"><p style="margin-top: 3px; margin-bottom: 3px; line-height: 1.25;"> 
-				<b>StageInteractor: Query-based Object Detector with Cross-stage Interaction </b><br>
-				<strong>Yao Teng</strong>, Haisong Liu, Sheng Guo and Limin Wang<br>
-				<em>ICCV 2023</em>.<br>
-				<alert>New label assignment and feature interaction for query-based object detection. </alert><br>
-			[ <a href="https://openaccess.thecvf.com/content/ICCV2023/papers/Teng_StageInteractor_Query-based_Object_Detector_with_Cross-stage_Interaction_ICCV_2023_paper.pdf" target="'_blank">Paper</a> ]
-			[ <a href="https://github.com/MCG-NJU/StageInteractor" target="'_blank">Code</a> ]
-			</p></td></tr>
-		</tbody>
-
-		<tbody><tr>
-			<td width="30%" valign="middle"><p><img src="figures/logn.jpg" width=90% alt="ISL" style="border-style: none" align="top"></p></td>
-			<td width="70%" valign="middle"><p style="margin-top: 3px; margin-bottom: 3px; line-height: 1.25;"> 
-				<b>Logit Normalization for Long-tail Object Detection </b><br>
-				Liang Zhao*, <strong>Yao Teng*</strong> and Limin Wang<br>
-				<em>International Journal of Computer Vision</em>.<br>
-				<alert>A test-time batch normalization to calibrate logits for long-tail object detection. </alert><br>
-			[ <a href="https://arxiv.org/pdf/2203.17020.pdf" target="'_blank">Paper</a> ]
-			[ <a href="https://github.com/MCG-NJU/LogN" target="'_blank">Code</a> ]
-			</p></td></tr>
-		</tbody>
-
-		<tbody><tr>
-			<td width="30%" valign="middle"><p><img src="figures/ss-rcnn.jpg" width=90% alt="ISL" style="border-style: none" align="top"></p></td>
-			<td width="70%" valign="middle"><p style="margin-top: 3px; margin-bottom: 3px; line-height: 1.25;">
-				<b>Structured Sparse R-CNN for Direct Scene Graph Generation</b><br>
-				<strong>Yao Teng</strong> and Limin Wang<br>
-				<em>CVPR 2022</em>.<br>
-				<alert>The first one-stage end-to-end scene graph generation framework without extra object detector for inference.</alert><br>
-			[ <a href="https://openaccess.thecvf.com/content/CVPR2022/papers/Teng_Structured_Sparse_R-CNN_for_Direct_Scene_Graph_Generation_CVPR_2022_paper.pdf" target="'_blank">Paper</a> ]
-			[ <a href="https://github.com/MCG-NJU/Structured-Sparse-RCNN" target="'_blank">Code</a> ]
-            [ <a href="https://zhuanlan.zhihu.com/p/492255428" target="'_blank">Zhihu</a> ]
-			</p></td></tr>
-		</tbody>
-
-		<tbody><tr>
-			<td width="30%" valign="middle"><p><img src="figures/trace.jpg" width=90% alt="ISL" style="border-style: none" align="top"></p></td>
-			<td width="70%" valign="middle"><p style="margin-top: 3px; margin-bottom: 3px; line-height: 1.25;">
-				<b>Target Adaptive Context Aggregation for Video Scene Graph Generation</b><br>
-				<strong>Yao Teng</strong>, Limin Wang, Zhifeng Li and Gangshan Wu<br>
-				<em>ICCV 2021</em>.<br>
-				<alert>The first framework unifying the frame-level and video-level scene graph generation.</alert><br>
-			[ <a href="https://openaccess.thecvf.com/content/ICCV2021/papers/Teng_Target_Adaptive_Context_Aggregation_for_Video_Scene_Graph_Generation_ICCV_2021_paper.pdf" target="'_blank">Paper</a> ]
-			[ <a href="https://github.com/MCG-NJU/TRACE" target="'_blank">Code</a> ]
-			</p></td></tr>
-		</tbody>
-				
-	</table>
-
-	
-	<h2>Selected Awards</h2>
-		<font style="line-height: 1.5;font-size: 1.05em;">
-			<ul>
-				<li>National Scholarship for Postgraduates, Nanjing University, 2021</li>
-				<li>Pacemaker to Outstanding Graduate Student, Nanjing University, 2021</li>
-				<li>1st Prize, Scholarship for Postgraduate Students, Nanjing University, 2021</li>
-                <li>2nd Award, University Scholarship, Xidian University, 2016-2018</li>
-				<li>Silver Medal, The 2019 ICPC China Shaanxi Provincial Programming Contest, Xidian University, 2019</li>
-			</ul>
-		</font>
-
-	<!--
-	<h2> Miscellaneous</h2>
-		<table border="1" style="border-width: 0px;" width="900">
-			<tbody>
-				<tr>
-					<td style="border-style: none; border-width: medium;">
-						<p style="margin-top: 3px; margin-bottom: 3px; line-height: 1;"><font face="Open Sans" style="font-size: 11pt;">
-							TODO
-						<br><br>
-                            TODO
-						<br><br>
-
-					</font></p><font face="Open Sans" style="font-size: 11pt;"></font>
-					</td>
-				</tr>
-			</tbody>
-		</table><br>
-		
-	-->
-	</div>
-
-	<!-- Epigraph -->
-	<div style="text-align: center; margin-top: 40px; margin-bottom: 20px; font-style: italic; color: #555; font-family: 'Lato', sans-serif;">
-		"More willingness to do non-flashy work in order to improve the final model;<br>
-		Less ego enabling org charts to scale slightly."<br>
-		— <a href="https://www.interconnects.ai/p/notes-from-inside-chinas-ai-labs" target="_blank" style="color: #555; text-decoration: none;">Nathan Lambert</a>
-	</div>
-
-    <script type='text/javascript' id='clustrmaps' src='//cdn.clustrmaps.com/map_v2.js?cl=ff0202&w=155&t=n&d=S8GixmBxbfw9KGb7Jf6Zh1rT-XqpkzRGs7HO_MYdewM&co=68c0ff&ct=ffffff&cmo=eeff00&cmn=f6a2ff'></script>
+	<script src="js/home.js"></script>
+	<script src="js/ambient.js"></script>
 </body>
+</html>
