@@ -4,7 +4,6 @@
   var AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) { btn.style.display = 'none'; return; }
 
-  var KEY = 'home:sound';
   var CYCLE_MS = 48000;
 
   /*
@@ -158,11 +157,14 @@
     noteTimer = setTimeout(function () { pluck(); scheduleNotes(); }, 5000 + Math.random() * 5000);
   }
 
+  var LABELS = ['Sound off', 'Ambient'];
+  var mode = 0;   /* 0 = off, 1 = ambient */
+
   function setUI() {
-    btn.classList.toggle('on', on);
-    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.classList.toggle('on', mode > 0);
+    btn.setAttribute('aria-pressed', mode > 0 ? 'true' : 'false');
     var l = btn.querySelector('.lbl');
-    if (l) l.textContent = on ? 'Sound on' : 'Sound off';
+    if (l) l.textContent = LABELS[mode];
   }
 
   function start() {
@@ -177,7 +179,6 @@
     clearInterval(tickTimer); tickTimer = setInterval(steer, 400);
     scheduleNotes();
     setTimeout(pluck, 2500);
-    try { localStorage.setItem(KEY, 'on'); } catch (e) {}
   }
   function stop() {
     on = false; setUI();
@@ -189,10 +190,17 @@
       master.gain.linearRampToValueAtTime(0, now + 1.6);
       setTimeout(function () { if (!on && ctx) ctx.suspend(); }, 1900);
     }
-    try { localStorage.setItem(KEY, 'off'); } catch (e) {}
   }
 
-  btn.addEventListener('click', function () { on ? stop() : start(); });
+  /* one button, two states: ambient / off.
+   * Serenity (js/bgm2.js) is parked: to bring it back, restore the script tag in
+   * index.html and change this to a three-state cycle (off -> ambient -> serenity). */
+  btn.addEventListener('click', function () {
+    mode = (mode + 1) % 2;
+    if (mode === 1) start();
+    else stop();
+    setUI();
+  });
 
   document.addEventListener('visibilitychange', function () {
     if (!ctx) return;
@@ -200,17 +208,6 @@
     else if (on) ctx.resume();
   });
 
-  /* browsers block autoplay: if the visitor left it on last time, resume on the first gesture */
-  var saved = null;
-  try { saved = localStorage.getItem(KEY); } catch (e) {}
-  if (saved === 'on') {
-    var resume = function () {
-      removeEventListener('pointerdown', resume, true);
-      removeEventListener('keydown', resume, true);
-      if (!on) start();
-    };
-    addEventListener('pointerdown', resume, true);
-    addEventListener('keydown', resume, true);
-  }
+  /* sound starts only when the visitor presses the toggle - never from a stray click elsewhere */
   setUI();
 })();
