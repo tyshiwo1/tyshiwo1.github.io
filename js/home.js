@@ -336,7 +336,7 @@
   onScroll();
 
   /* ---------- card spotlight ---------- */
-  document.querySelectorAll('.paper').forEach(function (card) {
+  document.querySelectorAll('.paper, .proj').forEach(function (card) {
     card.addEventListener('mousemove', function (e) {
       var r = card.getBoundingClientRect();
       card.style.setProperty('--mx', (e.clientX - r.left) + 'px');

@@ -34,6 +34,7 @@
 		<nav class="links">
 			<a href="#about">About</a>
 			<a href="#path">Path</a>
+			<a href="#projects">Projects</a>
 			<a href="#research">Research</a>
 			<a href="#awards">Awards</a>
 			<a class="blog" href="blog/">Blog &rarr;</a>
@@ -74,8 +75,9 @@
 				<div class="about-grid">
 					<div class="about-text">
 						<p>
-							I am a third-year PhD student at <b>The University of Hong Kong</b>,
+							I am a fourth-year PhD student at <b>The University of Hong Kong</b>,
 							supervised by <a href="https://xh-liu.github.io/" target="_blank" rel="noopener">Xihui Liu</a>.
+							I am on the job market, graduating in July 2027 and seeking full-time research scientist / research engineer positions.
 						</p>
 						<p>
 							Before that, I was an M.Sc. student in the
@@ -100,7 +102,7 @@
 						<div class="track-label">Education</div>
 						<ul class="timeline">
 							<li class="now">
-								<div class="when">2023 &ndash; PRESENT</div>
+								<div class="when">2023 &ndash; 2027 (EXPECTED)</div>
 								<div class="what">The University of Hong Kong</div>
 								<div class="sub">PhD &middot; HKU MMLab</div>
 							</li>
@@ -121,7 +123,7 @@
 							<li class="now">
 								<div class="when">2026.02 &ndash; PRESENT</div>
 								<div class="what">Tencent</div>
-								<div class="sub">Research intern &middot; World Model</div>
+								<div class="sub">Hunyuan World Model Team &middot; Core Contributor of Hy-Nomas</div>
 							</li>
 							<li>
 								<div class="when">2025.03 &ndash; 2026.02</div>
@@ -134,10 +136,55 @@
 			</section>
 		</div>
 
+		<!-- ================= INDUSTRY PROJECTS ================= -->
+		<div class="wrap">
+			<section id="projects">
+				<h2 class="sec-title reveal"><small>02</small>Industry Projects</h2>
+
+				<article class="proj reveal">
+					<div class="proj-fig"><img src="figures/hynomas.jpg" alt="Hy-Nomas: interactive world generation with text and camera control"></div>
+					<div class="proj-body">
+						<div class="meta">
+							<span class="venue">2026.02 &ndash; Present</span>
+							<span class="tag">Tencent Hunyuan World Model Team</span>
+						</div>
+						<h3>Hy-Nomas: Towards Free-form Interactive World Generation</h3>
+						<p class="role-line">Core Contributor</p>
+						<p class="proj-intro">
+							Hy-Nomas is Tencent Hunyuan&rsquo;s open-source, free-form interactive video world model. It generates a world segment by segment with an 8B autoregressive diffusion transformer, letting users keep steering it with multi-turn text prompts and camera trajectories, while a persistent KV cache serves as world memory. It outputs 720&times;1280 video at 24 FPS and is released under Apache 2.0.
+						</p>
+						<div class="plinks proj-links">
+							<a href="https://github.com/Tencent-Hunyuan/Hy-Nomas" target="_blank" rel="noopener">Code</a>
+							<a href="https://hy-nomas.hy.tencent.com/" target="_blank" rel="noopener">Project Page</a>
+							<a href="https://huggingface.co/tencent/Hy-Nomas" target="_blank" rel="noopener">Model</a>
+							<a href="https://github.com/Tencent-Hunyuan/Hy-Nomas/blob/main/Hy_Nomas_Tech_Report.pdf" target="_blank" rel="noopener">Tech Report</a>
+							<a href="https://hy-nomas.hy.tencent.com/demo" target="_blank" rel="noopener">Demo</a>
+						</div>
+
+						<div class="proj-sub">My contributions</div>
+						<div class="proj-list">
+							<details class="proj-item">
+								<summary><span class="pt">VAE training framework</span><span class="ps">Team&rsquo;s image/video VAE training codebase for high-res long videos</span></summary>
+								<p>Built the team&rsquo;s image/video VAE training codebase: (i) distributed training that shards both model parameters and activations across GPUs, enabling multi-scale, image-video joint training on high-resolution long videos; (ii) mainstream VAE architectures with standard training objectives, including perceptual, GAN and semantic losses; (iii) standardized reconstruction benchmarks and training-health monitoring; and (iv) billion-parameter DiT pre-training for latent-space validation.</p>
+							</details>
+							<details class="proj-item">
+								<summary><span class="pt">Billion-scale data curation</span><span class="ps">Pre-training data pipeline on a hundred-GPU cluster</span></summary>
+								<p>Built an image/video pre-training data curation pipeline on a hundred-GPU cluster, covering large-scale embedding extraction, hierarchical clustering, deduplication, category rebalancing and safety filtering.</p>
+							</details>
+							<details class="proj-item">
+								<summary><span class="pt">One-step pixel diffusion decoder</span><span class="ps">~7B pixel-space video DiT decoder, distilled to one step</span></summary>
+								<p>Building on the framework and data above, trained a ~7B pixel-space video DiT as the VAE decoder to recover high-frequency details lost in latent compression; distilled it into a one-step sampler and enabled streaming decoding for world-model generation. Integrated into the final mainline release.</p>
+							</details>
+						</div>
+					</div>
+				</article>
+			</section>
+		</div>
+
 		<!-- ================= RESEARCH ================= -->
 		<div class="wrap">
 			<section id="research">
-				<h2 class="sec-title reveal"><small>02</small>Selected Research <span class="aux"><a href="https://scholar.google.com.hk/citations?user=eLIsViIAAAAJ&hl=en" target="_blank" rel="noopener">[ Google Scholar ]</a></span></h2>
+				<h2 class="sec-title reveal"><small>03</small>Selected Research <span class="aux"><a href="https://scholar.google.com.hk/citations?user=eLIsViIAAAAJ&hl=en" target="_blank" rel="noopener">[ Google Scholar ]</a></span></h2>
 
 				<div class="filters reveal">
 					<button class="on" data-filter="all">All</button>
@@ -155,7 +202,6 @@
 							<div class="meta">
 								<span class="venue">Preprint &middot; 2026</span>
 								<span class="tag">survey</span>
-								<span class="badge">NEW</span>
 							</div>
 							<h3>Towards Next-Generation Architectures of Large Language Models: A Survey</h3>
 							<p class="authors"><b>Yao Teng</b>&dagger;, Guoxuan Chen&dagger;, Yimeng Chen*, Han Shi*, Piotr Pi&#281;kos, Jie Ran, Yutao Zeng, Chuanyang Zheng, Jingyao Li, Li Nanbo, Haoli Bai, Chao Huang, Xihui Liu, Di He, Weiyang Liu and J&uuml;rgen Schmidhuber</p>
@@ -394,7 +440,7 @@
 		<!-- ================= AWARDS ================= -->
 		<div class="wrap">
 			<section id="awards">
-				<h2 class="sec-title reveal"><small>03</small>Selected Awards</h2>
+				<h2 class="sec-title reveal"><small>04</small>Selected Awards</h2>
 				<ul class="awards reveal">
 					<li><span class="yr">2021</span><span class="t">National Scholarship for Postgraduates<small>Nanjing University</small></span></li>
 					<li><span class="yr">2021</span><span class="t">Pacemaker to Outstanding Graduate Student<small>Nanjing University</small></span></li>
